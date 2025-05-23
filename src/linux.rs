@@ -34,7 +34,7 @@ impl Output {
     fn get_root(self) -> Result<String, HWIDError> {
         for devc in self.blockdevices.into_iter() {
             if let Some(mountpoint) = devc.mountpoint {
-                if mountpoint.eq("/") {
+                if mountpoint.eq("/") || mountpoint.eq("/boot") || mountpoint.eq("[SWAP]") {
                     // If the main disk is a sdcard, it's much safer to use the hardware cid over partition uuid
                     if devc.name.contains("mmc") {
                         let disk_name = &devc.name[0..devc.name.len() - 2];
@@ -55,7 +55,7 @@ impl Output {
             if let Some(children) = devc.children {
                 for chld_device in children.into_iter() {
                     if let Some(mnt) = chld_device.mountpoint {
-                        if mnt.eq("/") {
+                        if mnt.eq("/") || mnt.eq("/boot") || mnt.eq("[SWAP]") {
                             if let Some(uuid) = chld_device.uuid {
                                 return Ok(uuid);
                             }
