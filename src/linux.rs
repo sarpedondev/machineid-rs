@@ -149,7 +149,7 @@ fn get_file_content(path: &str) -> Result<String, HWIDError> {
 #[cfg(target_os = "linux")]
 pub(crate) fn get_hwid() -> Result<String, HWIDError> {
     for path in MACHINE_ID_FILES.iter() {
-        if std::path::Path::new(path).exists() {
+        if std::path::Path::new(path).exists() && std::path::Path::new(path).is_file() {
             let content = get_file_content(path)?;
             return Ok(content);
         }
