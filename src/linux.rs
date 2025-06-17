@@ -74,9 +74,7 @@ impl Output {
 #[cfg(target_os = "linux")]
 pub(crate) fn get_disk_id() -> Result<String, HWIDError> {
     let output = run_command("lsblk -f -J -o NAME,MOUNTPOINT,UUID")?;
-
-    let output_string = String::from_utf8(output.into())?;
-    let parsed: Output = serde_json::from_str(output_string.as_str())?;
+    let parsed: Output = serde_json::from_str(&output)?;
     let uuid = parsed.get_root()?;
     Ok(uuid)
 }
@@ -84,17 +82,17 @@ pub(crate) fn get_disk_id() -> Result<String, HWIDError> {
 #[cfg(target_os = "linux")]
 fn run_command(command: &str) -> Result<String, HWIDError> {
     let mut cmd = Command::new("sh");
-    let cmd = cmd.arg("-c").arg(command);
-
+    cmd.arg("-c").arg(command);
     let output = cmd.output()?;
-    if !cmd.status()?.success() {
+
+    if !output.status.success() {
         return Err(HWIDError::new(
             &format!("Failed to run command: {command}"),
-            &String::from_utf8(output.stderr.into())?,
+            &String::from_utf8_lossy(&output.stderr),
         ));
     }
 
-    Ok(String::from_utf8(cmd.output()?.stdout)?)
+    Ok(String::from_utf8(output.stdout)?)
 }
 
 #[cfg(target_os = "linux")]
